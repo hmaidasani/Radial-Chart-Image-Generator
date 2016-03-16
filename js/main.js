@@ -209,6 +209,20 @@ $(function($) {
     if (isSafari) $('#browser-alert').modal();
 });
 
+function checkColor(colorValue){
+
+    //first test the color
+    var isValidHexColor = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(colorValue) // for #f00 (Thanks Smamatti)
+
+    if (!isValidHexColor){        
+        //lets try to 'fix' the color
+        //we don't want double hashes.. so remove these.
+        colorValue = colorValue.replace(/(#)(?=.*\1)/g, "");
+    }
+
+    return colorValue;
+
+}
 
 function changeArc(arcId, dataChange, value, doNotLog) {
     if(doNotLog) {
@@ -217,23 +231,25 @@ function changeArc(arcId, dataChange, value, doNotLog) {
         ga('send', 'event', 'button', 'click', 'changeArc_' + arcId + '_' + dataChange);
     }  
 	var obj = {};
-    color = $(arcId).css('color');
+
+    color = checkColor($(arcId).css('color'));
+
     if(dataChange === 'max-value') {
         obj = {"max":value};
         $(arcId).attr('data-max', value);
         $(arcId).parents('.chart-box').find('.subtext-max').text(value);
     } else if(dataChange === 'foreground-color-start') {
-        obj = {"fgColor":value};
-        $(arcId).attr('data-fgcolor', value);
+        obj = {"fgColor":checkColor(value)};
+        $(arcId).attr('data-fgcolor', checkColor(value));
     } else if(dataChange === 'foreground-color-mid') {
         obj = {"fgColorMid":value};
-        $(arcId).attr('data-fgcolormid', value);
+        $(arcId).attr('data-fgcolormid', checkColor(value));
     } else if(dataChange === 'foreground-color-end') {
-        obj = {"fgColorEnd":value};
-        $(arcId).attr('data-fgcolorend', value);
+        obj = {"fgColorEnd":checkColor(value)};
+        $(arcId).attr('data-fgcolorend', checkColor(value));
     } else if(dataChange === 'background-color') {
-        obj = {"bgColor":value, "bgColorMid":value, "bgColorEnd":value};
-        $(arcId).attr('data-bgcolor', value);
+        obj = {"bgColor":checkColor(value), "bgColorMid":checkColor(value), "bgColorEnd":checkColor(value)};
+        $(arcId).attr('data-bgcolor', checkColor(value));
     } else if(dataChange === 'arc-thickness') {
         obj = {"thickness":value};
         $(arcId).attr('data-thickness', value);
@@ -252,18 +268,20 @@ function changeArc(arcId, dataChange, value, doNotLog) {
         obj = {"lineCap":value};
         $(arcId).attr('data-linecap', value);
     } else if(dataChange === 'shadow-color') {
-        $(arcId).attr('data-shadowColor', value);
+        $(arcId).attr('data-shadowColor', checkColor(value));
     } else if(dataChange === 'text-color') {
-        obj = {"inputColor":value};
-        $('.knob').css('color', value);
-        $('.subtext').css('color', value);
-        $(arcId).attr('data-inputColor', value);
+        obj = {"inputColor":checkColor(value)};
+        $('.knob').css('color', checkColor(value));
+        $('.subtext').css('color', checkColor(value));
+        $(arcId).attr('data-inputColor', checkColor(value));
         return;
     } else if (dataChange === 'units') {
         $('.subtext-units').text(value);
         return;
     }
     obj['inputColor'] = color;
+
+
     if(dataChange !== 'current-value') {
 	   $(arcId).attr(dataChange, value).trigger("configure", obj);
     } else if(dataChange === 'current-value') {
